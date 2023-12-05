@@ -54,3 +54,4 @@ class VIXAnalysisApp:
 if __name__ == "__main__":
     app = VIXAnalysisApp()
     app.run_streamlit_app()
+
