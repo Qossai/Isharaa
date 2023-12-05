@@ -45,17 +45,19 @@ class VIXAnalysisApp:
         prices = self.fetch_data()
         color = self.analyze_data(prices)
 
-        # Colorize the result text
-        if color == "Green":
-            st.write(f"Condition Result: <span style='color:green'>{color}</span>", unsafe_allow_html=True)
-        elif color == "Yellow":
-            st.write(f"Condition Result: <span style='color:yellow'>{color}</span>", unsafe_allow_html=True)
-        elif color == "Red":
-            st.write(f"Condition Result: <span style='color:red'>{color}</span>", unsafe_allow_html=True)
+        # Define background color based on the analysis result
+        background_color = {"Green": "green", "Yellow": "yellow", "Red": "red"}
+
+        # Define text style for the colored result
+        text_style = "font-size: 24px; font-weight: bold; color: black;"
+
+        # Display the result with colored background, larger text, and bold
+        if color in background_color:
+            st.markdown(f"<div style='background-color: {background_color[color]}; padding: 10px; border-radius: 5px;'><p style='{text_style}'>Condition Result: {color}</p></div>", unsafe_allow_html=True)
         else:
             st.write(f"Condition Result: {color}")
 
-        # Create a nice table for prices
+        # Create a nice table for prices without indexes
         st.write("Prices:")
         price_table = [(key, prices[key]) for key in prices if key != "SVIX"]  # Remove "SVIX" from visualization
         st.table(price_table)
