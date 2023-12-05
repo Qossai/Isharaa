@@ -1,7 +1,6 @@
 import yfinance as yf
 import streamlit as st
 import matplotlib.pyplot as plt
-from PIL import Image
 
 class VIXAnalysisApp:
     def __init__(self):
@@ -51,10 +50,6 @@ class VIXAnalysisApp:
 
         # Define text style for the colored result
         text_style = "font-size: 24px; font-weight: bold; color: black;"
-
-        # Traffic lights image
-        image = Image.open("traffic_lights.png")
-        st.image(image, width=100)
 
         # Display the result with colored background, larger text, and bold
         if color in background_color:
