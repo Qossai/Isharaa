@@ -53,37 +53,22 @@ class VIXAnalysisApp:
 
         # Display the result with colored background, larger text, and bold
         if color in background_color:
-            if color == "Yellow":
-                st.markdown(f"<div style='background-color: {background_color[color]}; padding: 10px; border-radius: 5px;'><p style='{text_style}'>It's getting risky</p></div>", unsafe_allow_html=True)
-            elif color == "Green":
-                st.markdown(f"<div style='background-color: {background_color[color]}; padding: 10px; border-radius: 5px;'><p style='{text_style}'>Everything should be OK</p></div>", unsafe_allow_html=True)
-            else:
-                st.markdown(f"<div style='background-color: {background_color[color]}; padding: 10px; border-radius: 5px;'><p style='{text_style}'>{color}</p></div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='background-color: {background_color[color]}; padding: 10px; border-radius: 5px;'><p style='{text_style}'>Condition Result: {color}</p></div>", unsafe_allow_html=True)
         else:
-            st.write(f"{color}")
+            st.write(f"Condition Result: {color}")
 
         # Create a nice table for prices without indexes
         st.write("Prices:")
         price_table = [(key, prices[key]) for key in prices if key != "SVIX"]  # Remove "SVIX" from visualization
         st.table(price_table)
-        # Center-align the table
-        st.markdown("""<style>
-                    table {
-                        width: 50%;
-                        align: left;
-                    }
-                    </style>""", unsafe_allow_html=True)
 
-        # Visualization on the right
-        st.write("VIX Prices Visualization")
+        # Visualization
         fig, ax = plt.subplots()
         ax.bar(prices.keys(), [prices[key] for key in prices if key != "SVIX"])
         ax.set_ylabel('Prices')
+        ax.set_title('VIX Prices Visualization')
 
-        # Place the visualization on the right side
-        col1, col2 = st.beta_columns(2)
-        with col1:
-            st.pyplot(fig)
+        st.pyplot(fig)
 
 if __name__ == "__main__":
     app = VIXAnalysisApp()
