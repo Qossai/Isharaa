@@ -40,7 +40,7 @@ class VIXAnalysisApp:
             return "Neutral"
 
     def run_streamlit_app(self):
-        st.title("منظومة الاشارة")  # Change page title to "منظومة الاشارة" (Al-Ishara in Arabic) and centralize it
+        st.title("VIX Analysis")  # Revert to the original title
 
         prices = self.fetch_data()
         color = self.analyze_data(prices)
