@@ -31,9 +31,9 @@ class VIXAnalysisApp:
         vix6m = prices.get("^VIX6M", float('inf'))
 
         if vix9d < vix < vix3m < vix6m:
-            return "Green: everything should be fine"
+            return "Green"
         elif vix9d > vix:
-            return "Yellow: be careful it's getting risky"
+            return "Yellow"
         elif vix > vix3m:
             return "Red"
         else:
