@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 
 class VIXAnalysisApp:
     def __init__(self):
-        # Update symbols with caret (^) prefix
         self.symbols = ["^VIX9D", "^VIX", "^VIX3M", "^VIX6M"]
 
     def fetch_data(self):
@@ -13,14 +12,13 @@ class VIXAnalysisApp:
             ticker = yf.Ticker(symbol)
             data = ticker.history(period="1d")
             if not data.empty:
-                price = round(data['Close'].iloc[-1], 2)  # Round to 2 decimal places
+                price = round(data['Close'].iloc[-1], 2)
                 prices[symbol] = price
             else:
                 print(f"{symbol}: No data found")
         return prices
 
     def analyze_data(self, prices):
-        # Ensure all keys are present in the prices dictionary
         required_keys = ["^VIX9D", "^VIX", "^VIX3M", "^VIX6M"]
         if not all(key in prices for key in required_keys):
             return "Data Incomplete"
@@ -40,31 +38,32 @@ class VIXAnalysisApp:
             return "Neutral"
 
     def run_streamlit_app(self):
-        st.title("Al-Ishara")  # Change page title to "Al-Ishara" and centralize it
+        st.title("Al-Ishara")
 
         prices = self.fetch_data()
         color = self.analyze_data(prices)
 
-        # Define background color based on the analysis result
         background_color = {"Green": "green", "Yellow": "yellow", "Red": "red"}
-
-        # Define text style for the colored result
         text_style = "font-size: 24px; font-weight: bold; color: black;"
 
-        # Display the result with colored background, larger text, and bold
         if color in background_color:
             st.markdown(f"<div style='background-color: {background_color[color]}; padding: 10px; border-radius: 5px;'><p style='{text_style}'>{color}</p></div>", unsafe_allow_html=True)
         else:
             st.write(f"Condition Result: {color}")
 
-        # Create a nice table for prices without indexes
+        # Calculate ratios and add them to the prices dictionary
+        vix9d_vix_ratio = prices["^VIX9D"] / prices["^VIX"] if prices["^VIX"] != 0 else float('inf')
+        vix_vix3m_ratio = prices["^VIX"] / prices["^VIX3M"] if prices["^VIX3M"] != 0 else float('inf')
+        prices["VIX Ratios"] = f"VIX9D/VIX: {vix9d_vix_ratio:.2f}, VIX/VIX3M: {vix_vix3m_ratio:.2f}"
+
+        # Create a table for prices including the new ratios
         st.write("Prices:")
-        price_table = [(key[1:], prices[key]) for key in prices if key != "^SVIX"]  # Remove "^SVIX" from visualization and "^" from symbol names
+        price_table = [(key[1:], prices[key]) for key in prices]
         st.table(price_table)
 
         # Visualization
         fig, ax = plt.subplots()
-        ax.bar([key[1:] for key in prices if key != "^SVIX"], [prices[key] for key in prices if key != "^SVIX"])  # Remove "^" from symbol names
+        ax.bar([key[1:] for key in prices], [prices[key] if isinstance(prices[key], float) else 0 for key in prices])  # Handle non-float value in ratios
         ax.set_ylabel('Prices')
         ax.set_title('VIX Prices Visualization')
 
