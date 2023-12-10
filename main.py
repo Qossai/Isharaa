@@ -60,7 +60,7 @@ class VIXAnalysisApp:
         # Create a new figure with a white face color
         fig, ax = plt.subplots(figsize=(6, 3), subplot_kw={'aspect': 'auto'}, facecolor='white')
 
-        # Define the angle for each zone
+        # Define the angle for each zone based on the value ranges
         green_zone_angle = 180 * 2.5 / max_val
         yellow_zone_angle = 180 * 3.5 / max_val
 
@@ -76,7 +76,7 @@ class VIXAnalysisApp:
         for arc in [arc1, arc2, arc3]:
             ax.add_patch(arc)
 
-        # Convert value to angle. The angle needs to be adjusted to fit the gauge's scale.
+        # Convert value to angle using interpolation
         angle = np.interp(value, [min_val, max_val], [0, 180])
 
         # Draw the needle
@@ -84,7 +84,7 @@ class VIXAnalysisApp:
         needle_y = 0.5 + 0.4 * np.sin(np.radians(180 - angle))
         ax.plot([0.5, needle_x], [0.5, needle_y], color='black', lw=2, transform=ax.transAxes)
 
-        # Draw a small circle at the base of the needle to look like the pivot
+        # Draw a small circle at the base of the needle
         ax.plot([0.5], [0.5], color='black', marker='o', transform=ax.transAxes)
 
         # Set the aspect of the plot to be equal
@@ -94,8 +94,8 @@ class VIXAnalysisApp:
         ax.axis('off')
 
         # Add a text label below the gauge for the value
-        ax.text(0.5, 0.2, f'{value:.2f}', horizontalalignment='center', verticalalignment='center',
-                transform=ax.transAxes, fontsize=14, fontweight='bold')
+        ax.text(0.5, 0.1, f'{value:.2f}', horizontalalignment='center', verticalalignment='center',
+                transform=ax.transAxes, fontsize=12, fontweight='bold')
 
         return fig
 
