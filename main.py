@@ -53,20 +53,43 @@ class VIXAnalysisApp:
         normalized_percentile = 1 + (percentile / 100) * 4
         return normalized_percentile
 
-    def draw_gauge(self, value):
-        fig, ax = plt.subplots()
-        wedges = [
-            Wedge(center=(0, 0), r=1, theta1=0, theta2=180, color='green'),
-            Wedge(center=(0, 0), r=1, theta1=180, theta2=252, color='yellow'),
-            Wedge(center=(0, 0), r=1, theta1=252, theta2=360, color='red')
-        ]
-        for w in wedges:
-            ax.add_patch(w)
-        angle = 180 * value / 5
-        plt.plot([0, np.cos(np.radians(angle))], [0, np.sin(np.radians(angle))], color='black', lw=2)
-        ax.set_xlim(-1, 1)
-        ax.set_ylim(0, 1)
+    def draw_gauge(self, value, min_val=0, max_val=5):
+        # Create a new figure with a white face color
+        fig, ax = plt.subplots(figsize=(6, 3), subplot_kw={'aspect': 'auto'}, facecolor='white')
+
+        # Create the arcs
+        arc1 = Wedge(center=(0.5, 0.5), r=0.4, theta1=0, theta2=180, width=0.1, facecolor='green',
+                     transform=ax.transAxes)
+        arc2 = Wedge(center=(0.5, 0.5), r=0.4, theta1=180, theta2=252, width=0.1, facecolor='yellow',
+                     transform=ax.transAxes)
+        arc3 = Wedge(center=(0.5, 0.5), r=0.4, theta1=252, theta2=360, width=0.1, facecolor='red',
+                     transform=ax.transAxes)
+
+        # Add arcs to the plot
+        for arc in [arc1, arc2, arc3]:
+            ax.add_patch(arc)
+
+        # Convert value to angle. The angle needs to be adjusted to fit the gauge's scale.
+        angle = np.interp(value, [min_val, max_val], [0, 180])
+
+        # Draw the needle
+        needle_x = 0.5 + 0.4 * np.cos(np.radians(180 - angle))
+        needle_y = 0.5 + 0.4 * np.sin(np.radians(180 - angle))
+        ax.plot([0.5, needle_x], [0.5, needle_y], color='black', lw=2, transform=ax.transAxes)
+
+        # Draw a small circle at the base of the needle to look like the pivot
+        ax.plot([0.5], [0.5], color='black', marker='o', transform=ax.transAxes)
+
+        # Set the aspect of the plot to be equal
+        ax.set_aspect('equal')
+
+        # Remove the axes
         ax.axis('off')
+
+        # Add a text label below the gauge for the value
+        ax.text(0.5, 0.3, f'{value:.2f}', horizontalalignment='center', verticalalignment='center',
+                transform=ax.transAxes, fontsize=14)
+
         return fig
 
     def run_streamlit_app(self):
