@@ -56,39 +56,57 @@ class VIXAnalysisApp:
     import matplotlib.pyplot as plt
     from matplotlib.patches import Wedge
 
-    def draw_gauge(value, min_val=0, max_val=5):
-        # Create a new figure
-        fig, ax = plt.subplots()
+    def draw_gauge(self, value, min_val=0, max_val=5):
+        # Debugging: Print the type of 'value' to ensure it's numeric
+        print(f"Value: {value}, Type: {type(value)}")
+
+        # Ensure value is within bounds
+        value = max(min(float(value), max_val), min_val)
+
+        # Create a new figure with a white face color
+        fig, ax = plt.subplots(figsize=(6, 3), subplot_kw={'aspect': 'auto'}, facecolor='white')
+
+        # Define the angle for each zone based on the value ranges
+        green_zone_angle = 180 * 2.5 / max_val
+        yellow_zone_angle = 180 * 3.5 / max_val
 
         # Create the arcs
-        green_arc = Wedge(center=(0, 0), r=1, theta1=90, theta2=90 + (180 * 2.5 / 5), color='green')
-        yellow_arc = Wedge(center=(0, 0), r=1, theta1=90 + (180 * 2.5 / 5), theta2=90 + (180 * 3.5 / 5), color='yellow')
-        red_arc = Wedge(center=(0, 0), r=1, theta1=90 + (180 * 3.5 / 5), theta2=270, color='red')
+        arc1 = Wedge(center=(0.5, 0.5), r=0.4, theta1=0, theta2=green_zone_angle, width=0.1, facecolor='green',
+                     transform=ax.transAxes)
+        arc2 = Wedge(center=(0.5, 0.5), r=0.4, theta1=green_zone_angle, theta2=yellow_zone_angle, width=0.1,
+                     facecolor='yellow', transform=ax.transAxes)
+        arc3 = Wedge(center=(0.5, 0.5), r=0.4, theta1=yellow_zone_angle, theta2=180, width=0.1, facecolor='red',
+                     transform=ax.transAxes)
 
         # Add arcs to the plot
-        for arc in [green_arc, yellow_arc, red_arc]:
+        for arc in [arc1, arc2, arc3]:
             ax.add_patch(arc)
 
-        # Convert value to angle
+        # Convert value to angle using interpolation
         angle = 90 + (180 * value / max_val)
 
         # Draw the needle
-        ax.plot([0, -1 * np.cos(np.radians(angle))], [0, np.sin(np.radians(angle))], color='black', lw=2)
+        needle_x = 0.5 + 0.4 * np.cos(np.radians(180 - angle))
+        needle_y = 0.5 + 0.4 * np.sin(np.radians(180 - angle))
+        ax.plot([0.5, needle_x], [0.5, needle_y], color='black', lw=2, transform=ax.transAxes)
 
-        # Draw the small circle at the base of the needle
-        ax.plot(0, 0, color='black', marker='o')
+        # Draw a small circle at the base of the needle
+        ax.plot([0.5], [0.5], color='black', marker='o', transform=ax.transAxes)
 
-        # Set limits, aspect ratio and remove axes
-        ax.set_xlim(-1, 1)
-        ax.set_ylim(-0.1, 1)
-        ax.set_aspect('equal', 'box')
+        # Set the aspect of the plot to be equal
+        ax.set_aspect('equal')
+
+        # Remove the axes
         ax.axis('off')
 
-        # Add value text
-        ax.text(0, -0.2, f'{value:.2f}', horizontalalignment='center', verticalalignment='center', fontsize=15,
-                fontweight='bold')
+        # Add a text label below the gauge for the value
+        ax.text(0.5, 0.1, f'{value:.2f}', horizontalalignment='center', verticalalignment='center',
+                transform=ax.transAxes, fontsize=12, fontweight='bold')
 
-        plt.show()
+        # Show the figure (for debugging, remove for Streamlit)
+        #plt.show()
+
+        return fig
 
     # Example usage:
     draw_gauge(3.58)
