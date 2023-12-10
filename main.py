@@ -54,15 +54,22 @@ class VIXAnalysisApp:
         return normalized_percentile
 
     def draw_gauge(self, value, min_val=0, max_val=5):
+        # Ensure value is within bounds
+        value = max(min(value, max_val), min_val)
+
         # Create a new figure with a white face color
         fig, ax = plt.subplots(figsize=(6, 3), subplot_kw={'aspect': 'auto'}, facecolor='white')
 
+        # Define the angle for each zone
+        green_zone_angle = 180 * 2.5 / max_val
+        yellow_zone_angle = 180 * 3.5 / max_val
+
         # Create the arcs
-        arc1 = Wedge(center=(0.5, 0.5), r=0.4, theta1=0, theta2=180, width=0.1, facecolor='green',
+        arc1 = Wedge(center=(0.5, 0.5), r=0.4, theta1=0, theta2=green_zone_angle, width=0.1, facecolor='green',
                      transform=ax.transAxes)
-        arc2 = Wedge(center=(0.5, 0.5), r=0.4, theta1=180, theta2=252, width=0.1, facecolor='yellow',
-                     transform=ax.transAxes)
-        arc3 = Wedge(center=(0.5, 0.5), r=0.4, theta1=252, theta2=360, width=0.1, facecolor='red',
+        arc2 = Wedge(center=(0.5, 0.5), r=0.4, theta1=green_zone_angle, theta2=yellow_zone_angle, width=0.1,
+                     facecolor='yellow', transform=ax.transAxes)
+        arc3 = Wedge(center=(0.5, 0.5), r=0.4, theta1=yellow_zone_angle, theta2=180, width=0.1, facecolor='red',
                      transform=ax.transAxes)
 
         # Add arcs to the plot
@@ -87,8 +94,8 @@ class VIXAnalysisApp:
         ax.axis('off')
 
         # Add a text label below the gauge for the value
-        ax.text(0.5, 0.3, f'{value:.2f}', horizontalalignment='center', verticalalignment='center',
-                transform=ax.transAxes, fontsize=14)
+        ax.text(0.5, 0.2, f'{value:.2f}', horizontalalignment='center', verticalalignment='center',
+                transform=ax.transAxes, fontsize=14, fontweight='bold')
 
         return fig
 
