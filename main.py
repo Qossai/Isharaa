@@ -5,6 +5,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 from matplotlib.patches import Wedge
 
+
 class VIXAnalysisApp:
     def __init__(self):
         self.symbols = ["^VIX9D", "^VIX", "^VIX3M", "^VIX6M"]
@@ -53,24 +54,18 @@ class VIXAnalysisApp:
         normalized_percentile = 1 + (percentile / 100) * 4
         return normalized_percentile
 
-    import matplotlib.pyplot as plt
-    from matplotlib.patches import Wedge
-
     def draw_gauge(self, value, min_val=0, max_val=5):
-        # Debugging: Print the type of 'value' to ensure it's numeric
-        print(f"Value: {value}, Type: {type(value)}")
+        try:
+            value = float(value)
+        except ValueError:
+            print("Invalid value for gauge. Please provide a numeric value.")
+            return None
 
-        # Ensure value is within bounds
-        value = max(min(float(value), max_val), min_val)
-
-        # Create a new figure with a white face color
+        value = max(min(value, max_val), min_val)
         fig, ax = plt.subplots(figsize=(6, 3), subplot_kw={'aspect': 'auto'}, facecolor='white')
-
-        # Define the angle for each zone based on the value ranges
         green_zone_angle = 180 * 2.5 / max_val
         yellow_zone_angle = 180 * 3.5 / max_val
 
-        # Create the arcs
         arc1 = Wedge(center=(0.5, 0.5), r=0.4, theta1=0, theta2=green_zone_angle, width=0.1, facecolor='green',
                      transform=ax.transAxes)
         arc2 = Wedge(center=(0.5, 0.5), r=0.4, theta1=green_zone_angle, theta2=yellow_zone_angle, width=0.1,
@@ -78,38 +73,20 @@ class VIXAnalysisApp:
         arc3 = Wedge(center=(0.5, 0.5), r=0.4, theta1=yellow_zone_angle, theta2=180, width=0.1, facecolor='red',
                      transform=ax.transAxes)
 
-        # Add arcs to the plot
         for arc in [arc1, arc2, arc3]:
             ax.add_patch(arc)
 
-        # Convert value to angle using interpolation
         angle = 90 + (180 * value / max_val)
-
-        # Draw the needle
         needle_x = 0.5 + 0.4 * np.cos(np.radians(180 - angle))
         needle_y = 0.5 + 0.4 * np.sin(np.radians(180 - angle))
         ax.plot([0.5, needle_x], [0.5, needle_y], color='black', lw=2, transform=ax.transAxes)
-
-        # Draw a small circle at the base of the needle
         ax.plot([0.5], [0.5], color='black', marker='o', transform=ax.transAxes)
-
-        # Set the aspect of the plot to be equal
         ax.set_aspect('equal')
-
-        # Remove the axes
         ax.axis('off')
-
-        # Add a text label below the gauge for the value
         ax.text(0.5, 0.1, f'{value:.2f}', horizontalalignment='center', verticalalignment='center',
                 transform=ax.transAxes, fontsize=12, fontweight='bold')
 
-        # Show the figure (for debugging, remove for Streamlit)
-        #plt.show()
-
         return fig
-
-    # Example usage:
-    draw_gauge(3.58)
 
     def run_streamlit_app(self):
         st.title("Al-Ishara")
@@ -119,7 +96,9 @@ class VIXAnalysisApp:
         text_style = "font-size: 24px; font-weight: bold; color: black;"
 
         if color in background_color:
-            st.markdown(f"<div style='background-color: {background_color[color]}; padding: 10px; border-radius: 5px;'><p style='{text_style}'>{color}</p></div>", unsafe_allow_html=True)
+            st.markdown(
+                f"<div style='background-color: {background_color[color]}; padding: 10px; border-radius: 5px;'><p style='{text_style}'>{color}</p></div>",
+                unsafe_allow_html=True)
         else:
             st.write(f"Condition Result: {color}")
 
@@ -137,11 +116,13 @@ class VIXAnalysisApp:
         st.pyplot(fig)
 
         normalized_percentile = self.calculate_ratio_percentile()
-        st.write(f"Normalized VIX9D/VIX Ratio Percentile: {normalized_percentile:.2f} (1: Safest, 5: Riskiest)")
-        gauge_fig = self.draw_gauge(normalized_percentile)
-        st.pyplot(gauge_fig)
+        if normalized_percentile is not None:
+            st.write(f"Normalized VIX9D/VIX Ratio Percentile: {normalized_percentile:.2f} (1: Safest, 5: Riskiest)")
+            gauge_fig = self.draw_gauge(normalized_percentile)
+            if gauge_fig is not None:
+                st.pyplot(gauge_fig)
 
-# This line should be completely unindented and outside the class definition
+
 if __name__ == "__main__":
     app = VIXAnalysisApp()
     app.run_streamlit_app()
