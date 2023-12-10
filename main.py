@@ -82,30 +82,24 @@ class VIXAnalysisApp:
             st.write(f"Condition Result: {color}")
 
         prices['VIX9D/VIX Ratio'] = round(prices['VIX9D'] / prices['VIX'], 2) if prices['VIX'] != 0 else float('inf')
-        prices['VIX/VIX3M Ratio'] = round(prices['VIX'] / prices['VIX3M'], 2) if prices['VIX3M']
-
-        # Calculate ratios
-        prices['VIX9D/VIX Ratio'] = round(prices['VIX9D'] / prices['VIX'], 2) if prices['VIX'] != 0 else float('inf')
         prices['VIX/VIX3M Ratio'] = round(prices['VIX'] / prices['VIX3M'], 2) if prices['VIX3M'] != 0 else float('inf')
 
-        # Create a DataFrame for prices including the new ratios
         st.write("Prices:")
         price_df = pd.DataFrame([prices])
-        st.table(price_df.T)  # Transpose for better display
+        st.table(price_df.T)
 
-        # Visualization of Prices and Ratios
         fig, ax = plt.subplots()
         ax.bar(prices.keys(), prices.values())
         ax.set_ylabel('Prices and Ratios')
         ax.set_title('VIX Prices and Ratios Visualization')
         st.pyplot(fig)
 
-        # Display the gauge plot for the normalized percentile
         normalized_percentile = self.calculate_ratio_percentile()
         st.write(f"Normalized VIX9D/VIX Ratio Percentile: {normalized_percentile:.2f} (1: Safest, 5: Riskiest)")
         gauge_fig = self.draw_gauge(normalized_percentile)
         st.pyplot(gauge_fig)
 
-        if __name__ == "__main__":
-            app = VIXAnalysisApp()
-            app.run_streamlit_app()
+# This line should be completely unindented and outside the class definition
+if __name__ == "__main__":
+    app = VIXAnalysisApp()
+    app.run_streamlit_app()
