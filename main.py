@@ -2,7 +2,6 @@ import yfinance as yf
 import streamlit as st
 import matplotlib.pyplot as plt
 import pandas as pd
-import numpy as np
 
 class VIXAnalysisApp:
     def __init__(self):
@@ -39,25 +38,6 @@ class VIXAnalysisApp:
         else:
             return "Neutral"
 
-    def calculate_ratio_percentile(self):
-        # Fetch historical data for VIX9D and VIX
-        vix9d_data = yf.download('^VIX9D', start='2010-01-01', interval='1mo')
-        vix_data = yf.download('^VIX', start='2010-01-01', interval='1mo')
-
-        # Calculate historical VIX9D/VIX ratios
-        historical_ratios = (vix9d_data['Close'] / vix_data['Close']).dropna()
-
-        # Fetch current prices
-        current_prices = self.fetch_data()
-        current_ratio = current_prices['VIX9D'] / current_prices['VIX']
-
-        # Calculate the percentile of the current ratio
-        percentile = np.percentile(historical_ratios, current_ratio)
-
-        # Normalize the percentile to a 1-5 scale
-        normalized_percentile = np.interp(percentile, [0, 100], [1, 5])
-        return normalized_percentile
-
     def run_streamlit_app(self):
         st.title("Al-Ishara")
 
@@ -89,11 +69,6 @@ class VIXAnalysisApp:
 
         st.pyplot(fig)
 
-         # Display the normalized percentile of the current VIX9D/VIX ratio
-        normalized_percentile = self.calculate_ratio_percentile()
-        st.write(f"Normalized VIX9D/VIX Ratio Percentile: {normalized_percentile:.2f} (1: Safest, 5: Riskiest)")
-
 if __name__ == "__main__":
     app = VIXAnalysisApp()
     app.run_streamlit_app()
-
