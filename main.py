@@ -3,60 +3,35 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
+from matplotlib.patches import Wedge
 
 class VIXAnalysisApp:
-    def __init__(self):
-        self.symbols = ["^VIX9D", "^VIX", "^VIX3M", "^VIX6M"]
+    # ... [rest of your class code remains the same]
 
-    def fetch_data(self):
-        prices = {}
-        for symbol in self.symbols:
-            ticker = yf.Ticker(symbol)
-            data = ticker.history(period="1d")
-            if not data.empty:
-                price = round(data['Close'].iloc[-1], 2)
-                prices[symbol[1:]] = price  # Remove '^' from symbol for display
-            else:
-                print(f"{symbol}: No data found")
-        return prices
+    def draw_gauge(self, value):
+        fig, ax = plt.subplots()
 
-    def analyze_data(self, prices):
-        required_keys = ["VIX9D", "VIX", "VIX3M", "VIX6M"]
-        if not all(key in prices for key in required_keys):
-            return "Data Incomplete"
+        # Define the gauge sectors
+        wedges = [
+            Wedge(center=(0, 0), r=1, theta1=0, theta2=180, color='green'),
+            Wedge(center=(0, 0), r=1, theta1=180, theta2=252, color='yellow'),
+            Wedge(center=(0, 0), r=1, theta1=252, theta2=360, color='red')
+        ]
 
-        vix9d = prices.get("VIX9D", float('inf'))
-        vix = prices.get("VIX", float('inf'))
-        vix3m = prices.get("VIX3M", float('inf'))
-        vix6m = prices.get("VIX6M", float('inf'))
+        for w in wedges:
+            ax.add_patch(w)
 
-        if vix9d < vix < vix3m < vix6m:
-            return "Green"
-        elif vix9d > vix:
-            return "Yellow"
-        elif vix > vix3m:
-            return "Red"
-        else:
-            return "Neutral"
+        # Convert the value to an angle
+        angle = 180 * value / 5
 
-    def calculate_ratio_percentile(self):
-        # Fetch historical data for VIX9D and VIX
-        vix9d_data = yf.download('^VIX9D', start='2010-01-01', interval='1mo')
-        vix_data = yf.download('^VIX', start='2010-01-01', interval='1mo')
+        # Draw the needle
+        plt.plot([0, np.cos(np.radians(angle))], [0, np.sin(np.radians(angle))], color='black', lw=2)
 
-        # Calculate historical VIX9D/VIX ratios
-        historical_ratios = (vix9d_data['Close'] / vix_data['Close']).dropna()
+        ax.set_xlim(-1, 1)
+        ax.set_ylim(0, 1)
+        ax.axis('off')  # Turn off the axis
 
-        # Fetch current prices
-        current_prices = self.fetch_data()
-        current_ratio = current_prices['VIX9D'] / current_prices['VIX']
-
-        # Explicitly calculate the percentile
-        percentile = sum(historical_ratios < current_ratio) / len(historical_ratios) * 100
-
-        # Normalize the percentile to a 1-5 scale
-        normalized_percentile = 1 + (percentile / 100) * 4  # Adjusted normalization formula
-        return normalized_percentile
+        return fig
 
     def run_streamlit_app(self):
         st.title("Al-Ishara")
@@ -88,12 +63,12 @@ class VIXAnalysisApp:
         ax.set_title('VIX Prices and Ratios Visualization')
         st.pyplot(fig)
 
-        # Display the normalized percentile of the current VIX9D/VIX ratio
+        # Display the gauge plot for the normalized percentile
         normalized_percentile = self.calculate_ratio_percentile()
         st.write(f"Normalized VIX9D/VIX Ratio Percentile: {normalized_percentile:.2f} (1: Safest, 5: Riskiest)")
+        gauge_fig = self.draw_gauge(normalized_percentile)
+        st.pyplot(gauge_fig)
 
 if __name__ == "__main__":
     app = VIXAnalysisApp()
     app.run_streamlit_app()
-
-
